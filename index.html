@@ -10,17 +10,24 @@
 
     <header>
         <h2>✂️ Paper Cutout Match-Cut Generator</h2>
-        <p class="subtitle">Ketik satu kata kunci untuk membuat potongan koran & buku dinamis</p>
+        <p class="subtitle">Generator ratusan variasi potongan buku & koran kecepatan tinggi</p>
     </header>
     
     <div class="controls">
         <input type="text" id="keywordInput" placeholder="Ketik 1 kata..." value="Fokus">
         
-        <select id="speedSelect" title="Kecepatan Pergantian Frame">
-            <option value="1000">1 Frame / Detik (Lambat)</option>
-            <option value="500" selected>2 Frame / Detik (Normal)</option>
-            <option value="250">4 Frame / Detik (Cepat)</option>
-            <option value="150">6+ Frame / Detik (Agresif)</option>
+        <select id="speedSelect" title="Kecepatan Pergantian Klip">
+            <option value="500">2 Klip / Detik (Normal)</option>
+            <option value="250">4 Klip / Detik (Cepat)</option>
+            <option value="150">6.6 Klip / Detik (Agresif)</option>
+            <option value="125" selected>8 Klip / Detik (Sangat Cepat)</option>
+            <option value="80">12.5 Klip / Detik (Ekstrem)</option>
+        </select>
+
+        <select id="highlightModeSelect" title="Gaya Penanda Kata">
+            <option value="stabilo" selected>Ditandai Stabilo (Warna Penuh)</option>
+            <option value="subtle">Hanya Disorot (Garis & Tebal)</option>
+            <option value="none">Tanpa Tanda (Teks Menyatu)</option>
         </select>
 
         <select id="bgModeSelect" title="Mode Latar Belakang">
@@ -37,7 +44,7 @@
         <canvas id="paperCanvas" width="720" height="1280"></canvas>
     </main>
 
-    <div class="status" id="statusText">Siap digunakan. Kata akan terkunci di tengah dengan potongan kertas acak.</div>
+    <div class="status" id="statusText">Siap digunakan. Ratusan variasi halaman & font siap diputar.</div>
 
     <script src="script.js"></script>
 </body>
