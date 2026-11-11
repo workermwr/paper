@@ -3,247 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Highlight Video Generator</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            margin: 0;
-        }
-        .controls {
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 12px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            justify-content: center;
-        }
-        input, select, button {
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: none;
-            font-size: 16px;
-        }
-        input {
-            background: #2c2c2c;
-            color: white;
-            border: 1px solid #444;
-        }
-        button {
-            background: #ffeb3b;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        button:hover {
-            background: #fdd835;
-        }
-        button:active {
-            transform: scale(0.96);
-        }
-        button.record-btn {
-            background: #ff4081;
-            color: white;
-        }
-        canvas {
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
-            max-width: 100%;
-            height: auto;
-            max-height: 70vh;
-        }
-        .status {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #aaa;
-        }
-    </style>
+    <title>Dynamic Paper Cutout Generator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h2>📰 Paper Highlight Generator</h2>
+    <header>
+        <h2>✂️ Paper Cutout Match-Cut Generator</h2>
+        <p class="subtitle">Ketik satu kata kunci untuk membuat potongan koran & buku dinamis</p>
+    </header>
     
     <div class="controls">
-        <input type="text" id="keywordInput" placeholder="Masukkan 1 kata..." value="Kreativitas">
-        <select id="speedSelect">
-            <option value="1000">1 Frame / Detik</option>
-            <option value="500">2 Frame / Detik</option>
-            <option value="250">4 Frame / Detik</option>
+        <input type="text" id="keywordInput" placeholder="Ketik 1 kata..." value="Fokus">
+        
+        <select id="speedSelect" title="Kecepatan Pergantian Frame">
+            <option value="1000">1 Frame / Detik (Lambat)</option>
+            <option value="500" selected>2 Frame / Detik (Normal)</option>
+            <option value="250">4 Frame / Detik (Cepat)</option>
+            <option value="150">6+ Frame / Detik (Agresif)</option>
         </select>
+
+        <select id="bgModeSelect" title="Mode Latar Belakang">
+            <option value="dark" selected>Meja Gelap (Estetik)</option>
+            <option value="greenscreen">Green Screen (Untuk CapCut)</option>
+        </select>
+
         <button onclick="startPreview()">▶️ Putar Pratinjau</button>
+        <button class="stop-btn" onclick="stopPreview()">⏹️ Berhenti</button>
         <button class="record-btn" onclick="recordVideo()">🔴 Rekam Video (5 Detik)</button>
     </div>
 
-    <!-- Kanvas ukuran vertikal 9:16 (720x1280) -->
-    <canvas id="paperCanvas" width="720" height="1280"></canvas>
-    <div class="status" id="statusText">Siap digunakan. Ketik kata dan klik tombol di atas.</div>
+    <main class="canvas-wrapper">
+        <canvas id="paperCanvas" width="720" height="1280"></canvas>
+    </main>
 
-    <script>
-        const canvas = document.getElementById('paperCanvas');
-        const ctx = canvas.getContext('2d');
-        const statusText = document.getElementById('statusText');
-        let animationInterval;
+    <div class="status" id="statusText">Siap digunakan. Kata akan terkunci di tengah dengan potongan kertas acak.</div>
 
-        // Kumpulan paragraf artikel acak
-        const articles = [
-            "Perkembangan teknologi digital mengubah cara manusia berinteraksi setiap harinya. Inovasi terus bermunculan menciptakan peluang baru di berbagai sektor industri modern tanpa batas ruang dan waktu.",
-            "Para peneliti menemukan bahwa pola pikir terbuka sangat memengaruhi keberhasilan jangka panjang. Kemampuan beradaptasi dengan cepat menjadi kunci utama menghadapi tantangan zaman.",
-            "Dalam dunia seni dan desain modern, kesederhanaan sering kali menghasilkan dampak visual yang paling kuat. Elemen klasik seperti tekstur kertas lawas kembali diminati kreator masa kini.",
-            "Membaca literatur dari berbagai sudut pandang memperluas wawasan dan mempertajam analisis. Setiap halaman menyimpan gagasan berharga yang menunggu untuk ditemukan kembali.",
-            "Strategi komunikasi yang efektif membutuhkan penyampaian pesan yang singkat, padat, dan langsung menyentuh inti persoalan agar mudah diingat oleh audiens luas."
-        ];
-
-        // Variasi font koran & warna kertas
-        const fonts = ["Georgia", "Times New Roman", "Courier New", "Palatino", "Garamond"];
-        const paperColors = ["#f4efe6", "#eae3d2", "#f9f6f0", "#e6dec8", "#f0ebd8"];
-        const highlightColors = ["#ffeb3b", "#aeea00", "#00e5ff", "#ff80ab"];
-
-        function drawNewspaperFrame(keyword) {
-            // 1. Warna latar kertas acak
-            const bgColor = paperColors[Math.floor(Math.random() * paperColors.length)];
-            ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 2. Efek tekstur bintik kertas halus
-            for (let i = 0; i < 3000; i++) {
-                ctx.fillStyle = Math.random() > 0.5 ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.2)";
-                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
-            }
-
-            // 3. Garis tepi kolom koran
-            ctx.strokeStyle = "#bfb5a2";
-            ctx.lineWidth = 3;
-            ctx.strokeRect(40, 60, canvas.width - 80, canvas.height - 120);
-
-            // Header kecil ala koran
-            ctx.fillStyle = "#5c5549";
-            ctx.font = "bold 18px Courier New";
-            ctx.fillText("DAILY ARCHIVE  •  VOL. " + Math.floor(Math.random() * 99 + 10), 60, 100);
-            ctx.beginPath();
-            ctx.moveTo(60, 115);
-            ctx.lineTo(canvas.width - 60, 115);
-            ctx.stroke();
-
-            // 4. Susun teks artikel & sisipkan kata kunci
-            const font = fonts[Math.floor(Math.random() * fonts.length)];
-            const fontSize = Math.floor(Math.random() * 8) + 32; // Ukuran 32px - 40px
-            ctx.font = `${fontSize}px ${font}`;
-
-            // Gabungkan 2 artikel acak agar halaman penuh
-            let rawText = articles[Math.floor(Math.random() * articles.length)] + " " + 
-                          articles[Math.floor(Math.random() * articles.length)];
-            let words = rawText.split(" ");
-
-            // Sisipkan kata kunci di area tengah layar (sekitar kata ke-20 sampai ke-35)
-            const targetIndex = Math.floor(Math.random() * 15) + 20;
-            words.splice(targetIndex, 0, keyword);
-
-            // 5. Gambar kata demi kata
-            let x = 70;
-            let y = 180;
-            const maxWidth = canvas.width - 140;
-            const lineHeight = fontSize * 1.6;
-            const hlColor = highlightColors[Math.floor(Math.random() * highlightColors.length)];
-
-            for (let i = 0; i < words.length; i++) {
-                let word = words[i];
-                let wordWidth = ctx.measureText(word + " ").width;
-
-                if (x + wordWidth > maxWidth + 70) {
-                    x = 70;
-                    y += lineHeight;
-                }
-
-                if (y > canvas.height - 100) break;
-
-                // Cek apakah ini kata kunci target
-                if (i === targetIndex) {
-                    // Gambar kotak stabilo miring sedikit agar natural
-                    ctx.save();
-                    ctx.fillStyle = hlColor;
-                    ctx.fillRect(x - 6, y - fontSize + 6, ctx.measureText(word).width + 12, fontSize + 8);
-                    ctx.restore();
-
-                    // Teks kata kunci dicetak tebal
-                    ctx.font = `bold ${fontSize}px ${font}`;
-                    ctx.fillStyle = "#000000";
-                    ctx.fillText(word, x, y);
-                    ctx.font = `${fontSize}px ${font}`; // Kembalikan ke font normal
-                } else {
-                    ctx.fillStyle = "#2b2823";
-                    ctx.fillText(word, x, y);
-                }
-
-                x += wordWidth;
-            }
-        }
-
-        function startPreview() {
-            clearInterval(animationInterval);
-            const keyword = document.getElementById('keywordInput').value.trim() || "Kata";
-            const speed = parseInt(document.getElementById('speedSelect').value);
-            
-            drawNewspaperFrame(keyword);
-            statusText.innerText = "Memutar pratinjau animasi...";
-            
-            animationInterval = setInterval(() => {
-                drawNewspaperFrame(keyword);
-            }, speed);
-        }
-
-        function recordVideo() {
-            clearInterval(animationInterval);
-            const keyword = document.getElementById('keywordInput').value.trim() || "Kata";
-            const speed = parseInt(document.getElementById('speedSelect').value);
-            
-            statusText.innerText = "🔴 Sedang merekam video selama 5 detik... Mohon tunggu.";
-            
-            // Tangkap stream dari Canvas (30 FPS)
-            const stream = canvas.captureStream(30);
-            const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-            const chunks = [];
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunks.push(e.data);
-            };
-
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
-                
-                // Otomatis unduh video
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `highlight-${keyword}.webm`;
-                a.click();
-                
-                statusText.innerText = "✅ Selesai! Video berhasil diunduh.";
-            };
-
-            // Mulai rekam dan jalankan pergantian frame
-            mediaRecorder.start();
-            drawNewspaperFrame(keyword);
-            
-            animationInterval = setInterval(() => {
-                drawNewspaperFrame(keyword);
-            }, speed);
-
-            // Hentikan rekaman otomatis setelah 5 detik
-            setTimeout(() => {
-                clearInterval(animationInterval);
-                mediaRecorder.stop();
-            }, 5000);
-        }
-
-        // Gambar frame pertama saat halaman dibuka
-        window.onload = () => drawNewspaperFrame("Kreativitas");
-    </script>
+    <script src="script.js"></script>
+</body>
+</html>
