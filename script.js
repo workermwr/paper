@@ -14,7 +14,12 @@ const textSnippets = [
     { before: "Prinsip dasar dari efisiensi adalah memusatkan seluruh", after: "pada satu titik krusial sebelum melangkah ke tahap berikutnya." },
     { before: "Kebiasaan kecil yang dilakukan berulang kali akan membentuk", after: "yang sulit digoyahkan oleh situasi apa pun." },
     { before: "[Ref. 104] Secara historis, konsep mengenai", after: "telah tercatat dalam berbagai manuskrip kuno sejak abad pertengahan." },
-    { before: "Penelitian empiris menunjukkan korelasi positif antara", after: "dengan peningkatan daya ingat jangka panjang pada subjek uji." }
+    { before: "Penelitian empiris menunjukkan korelasi positif antara", after: "dengan peningkatan daya ingat jangka panjang pada subjek uji." },
+    { before: "Pada halaman terakhir manuskrip itu tertulis jelas bahwa", after: "adalah satu-satunya kunci untuk membuka pintu rahasia masa depan." },
+    { before: "Tajuk Rencana: Masyarakat modern sering kali melupakan esensi", after: "di tengah derasnya arus informasi yang datang silih berganti." },
+    { before: "Catatan Kaki 12: Fenomena", after: "telah diamati oleh berbagai ilmuwan sejak awal revolusi industri." },
+    { before: "Tidak ada pencapaian besar yang lahir tanpa pengorbanan dan", after: "yang ditempa melalui proses panjang penuh kegagalan." },
+    { before: "KOLOM OPINI — Mengapa generasi sekarang membutuhkan", after: "lebih dari sekadar kecepatan dalam mengambil keputusan strategis." }
 ];
 
 const fillerParagraphs = [
@@ -23,20 +28,31 @@ const fillerParagraphs = [
     "Dalam literatur klasik maupun modern, struktur narasi dibangun untuk menuntun pembaca memahami inti persoalan secara bertahap namun tetap menyisakan ruang perenungan.",
     "Catatan kaki dan kutipan dari berbagai sumber menunjukkan bahwa konsistensi merupakan jembatan utama antara teori abstrak dan penerapan nyata di lapangan.",
     "Arsip cetakan lama memiliki karakteristik tipografi yang khas, di mana setiap huruf dicetak menggunakan pelat logam di atas lembaran serat kayu alami.",
-    "Perubahan struktur sosial sering kali tercermin melalui tajuk rencana surat kabar yang terbit pada masa peralihan era industri menuju era informasi."
+    "Perubahan struktur sosial sering kali tercermin melalui tajuk rencana surat kabar yang terbit pada masa peralihan era industri menuju era informasi.",
+    "Setiap paragraf disusun mengikuti kaidah penulisan baku guna menjaga keakuratan data sejarah yang tersimpan di perpustakaan nasional.",
+    "Ketelitian dalam membaca tanda baca serta konteks kalimat menjadi syarat mutlak sebelum menarik kesimpulan dari sebuah dokumen resmi.",
+    "Sebagian besar naskah kuno mengalami perubahan warna kertas akibat proses oksidasi alami selama puluhan tahun penyimpanan.",
+    "Jurnal ilmiah edisi terbaru menyoroti pentingnya menjaga keseimbangan antara inovasi teknologi dan pelestarian nilai-nilai literasi."
 ];
 
-const fonts = ["Georgia", "Times New Roman", "Courier New", "Palatino", "Baskerville", "Garamond"];
+const fonts = [
+    "Georgia", "Times New Roman", "Courier New", "Palatino", 
+    "Baskerville", "Garamond", "Bookman Old Style", "Trebuchet MS", 
+    "Verdana", "Arial", "Lucida Console", "Impact", "Cambria", "Didot"
+];
 
 const paperPalettes = [
     { bg: "#f4efe6", text: "#22201e", border: "#cfc5b4", type: "novel" },
     { bg: "#e6e2d8", text: "#1a1a1a", border: "#b8b2a6", type: "newspaper" },
     { bg: "#fbf9f5", text: "#2c2a29", border: "#dcd7cd", type: "book" },
     { bg: "#dfd5c5", text: "#2b2118", border: "#bba990", type: "archive" },
-    { bg: "#1f1f1f", text: "#e8e8e8", border: "#444444", type: "darkprint" }
+    { bg: "#1f1f1f", text: "#e8e8e8", border: "#444444", type: "darkprint" },
+    { bg: "#f0f4f8", text: "#102a43", border: "#bcccdc", type: "lined" },
+    { bg: "#fdf6e3", text: "#332d25", border: "#d3c6aa", type: "journal" },
+    { bg: "#eceae4", text: "#1c1c1c", border: "#a3a098", type: "columns" }
 ];
 
-const highlightColors = ["#ffeb3b", "#00e5ff", "#aeea00", "#ff6e40", "#ea80fc"];
+const highlightColors = ["#ffeb3b", "#00e5ff", "#aeea00", "#ff6e40", "#ea80fc", "#ffd54f"];
 
 function drawTornPaper(x, y, w, h, fillStyle, strokeStyle, hasShadow = true) {
     ctx.save();
@@ -45,33 +61,33 @@ function drawTornPaper(x, y, w, h, fillStyle, strokeStyle, hasShadow = true) {
     ctx.lineWidth = 2;
     
     if (hasShadow) {
-        ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
-        ctx.shadowBlur = 28;
-        ctx.shadowOffsetX = (Math.random() - 0.5) * 24;
-        ctx.shadowOffsetY = 14;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetX = (Math.random() - 0.5) * 28;
+        ctx.shadowOffsetY = 15;
     }
 
     ctx.beginPath();
     ctx.moveTo(x, y);
 
-    const step = 16;
+    const step = Math.floor(Math.random() * 10) + 12;
     for (let curX = x; curX <= x + w; curX += step) {
-        let jitterY = y + (Math.random() - 0.5) * 9;
+        let jitterY = y + (Math.random() - 0.5) * 11;
         ctx.lineTo(curX, jitterY);
     }
     
     for (let curY = y; curY <= y + h; curY += step * 2) {
-        let jitterX = (x + w) + (Math.random() - 0.5) * 5;
+        let jitterX = (x + w) + (Math.random() - 0.5) * 7;
         ctx.lineTo(jitterX, curY);
     }
 
     for (let curX = x + w; curX >= x; curX -= step) {
-        let jitterY = (y + h) + (Math.random() - 0.5) * 9;
+        let jitterY = (y + h) + (Math.random() - 0.5) * 11;
         ctx.lineTo(curX, jitterY);
     }
 
     for (let curY = y + h; curY >= y; curY -= step * 2) {
-        let jitterX = x + (Math.random() - 0.5) * 5;
+        let jitterX = x + (Math.random() - 0.5) * 7;
         ctx.lineTo(jitterX, curY);
     }
 
@@ -84,43 +100,45 @@ function drawTornPaper(x, y, w, h, fillStyle, strokeStyle, hasShadow = true) {
 }
 function drawDynamicFrame(keyword) {
     const bgMode = document.getElementById('bgModeSelect').value;
+    const hlMode = document.getElementById('highlightModeSelect').value;
 
     if (bgMode === "greenscreen") {
         ctx.fillStyle = "#00b140";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     } else {
-        ctx.fillStyle = "#121110";
+        ctx.fillStyle = "#100f0e";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    for (let b = 0; b < 2; b++) {
+    const bgLayers = Math.floor(Math.random() * 2) + 2;
+    for (let b = 0; b < bgLayers; b++) {
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate((Math.random() - 0.5) * 0.45);
+        ctx.rotate((Math.random() - 0.5) * 0.55);
         const bgPal = paperPalettes[Math.floor(Math.random() * paperPalettes.length)];
-        const offsetX = (Math.random() - 0.5) * 140;
-        const offsetY = (Math.random() - 0.5) * 200;
-        drawTornPaper(-310 + offsetX, -420 + offsetY, 620, 840, bgPal.bg, bgPal.border, bgMode !== "greenscreen");
+        const offsetX = (Math.random() - 0.5) * 180;
+        const offsetY = (Math.random() - 0.5) * 240;
+        drawTornPaper(-320 + offsetX, -430 + offsetY, 640, 860, bgPal.bg, bgPal.border, bgMode !== "greenscreen");
         ctx.restore();
     }
 
     const palette = paperPalettes[Math.floor(Math.random() * paperPalettes.length)];
     const font = fonts[Math.floor(Math.random() * fonts.length)];
-    const fontSize = Math.floor(Math.random() * 16) + 34;
-    const angle = (Math.random() - 0.5) * 0.16;
-    const jitterX = (Math.random() - 0.5) * 35;
-    const jitterY = (Math.random() - 0.5) * 35;
+    const fontSize = Math.floor(Math.random() * 18) + 32;
+    const angle = (Math.random() - 0.5) * 0.18;
+    const jitterX = (Math.random() - 0.5) * 32;
+    const jitterY = (Math.random() - 0.5) * 32;
 
     ctx.save();
     ctx.translate((canvas.width / 2) + jitterX, (canvas.height / 2) + jitterY);
     ctx.rotate(angle);
 
-    const paperW = Math.floor(Math.random() * 150) + 550;
-    const paperH = Math.floor(Math.random() * 360) + 400;
+    const paperW = Math.floor(Math.random() * 160) + 540;
+    const paperH = Math.floor(Math.random() * 400) + 380;
     
     drawTornPaper(-paperW / 2, -paperH / 2, paperW, paperH, palette.bg, palette.border, bgMode !== "greenscreen");
 
-    for (let i = 0; i < 1400; i++) {
+    for (let i = 0; i < 1500; i++) {
         ctx.fillStyle = Math.random() > 0.5 ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.18)";
         ctx.fillRect((Math.random() - 0.5) * paperW, (Math.random() - 0.5) * paperH, 2, 2);
     }
@@ -134,9 +152,27 @@ function drawDynamicFrame(keyword) {
         ctx.moveTo(-paperW/2 + 30, -paperH/2 + 38);
         ctx.lineTo(paperW/2 - 30, -paperH/2 + 38);
         ctx.stroke();
+        ctx.font = "bold 14px Courier New";
+        ctx.fillText("ARCHIVES • VOL " + Math.floor(Math.random() * 90 + 10), -paperW/2 + 30, -paperH/2 + 26);
     } else if (palette.type === "book" || palette.type === "novel") {
         ctx.font = "italic 16px Georgia";
-        ctx.fillText("Hal. " + Math.floor(Math.random() * 300 + 12), paperW/2 - 90, -paperH/2 + 32);
+        ctx.fillText("Hal. " + Math.floor(Math.random() * 450 + 15), paperW/2 - 95, -paperH/2 + 32);
+    } else if (palette.type === "lined") {
+        ctx.strokeStyle = "rgba(100, 149, 237, 0.25)";
+        ctx.lineWidth = 1;
+        for (let ly = -paperH/2 + 40; ly < paperH/2 - 30; ly += 36) {
+            ctx.beginPath();
+            ctx.moveTo(-paperW/2 + 25, ly);
+            ctx.lineTo(paperW/2 - 25, ly);
+            ctx.stroke();
+        }
+    } else if (palette.type === "columns") {
+        ctx.beginPath();
+        ctx.moveTo(0, -paperH/2 + 25);
+        ctx.lineTo(0, paperH/2 - 25);
+        ctx.stroke();
+    } else if (palette.type === "journal") {
+        ctx.strokeRect(-paperW/2 + 20, -paperH/2 + 20, paperW - 40, paperH - 40);
     }
 
     const snippet = textSnippets[Math.floor(Math.random() * textSnippets.length)];
@@ -151,13 +187,28 @@ function drawDynamicFrame(keyword) {
     const lineHeight = fontSize * 1.55;
     const marginX = 45;
 
-    const hlColor = highlightColors[Math.floor(Math.random() * highlightColors.length)];
-    ctx.fillStyle = hlColor;
-    ctx.fillRect((-kwWidth / 2) - 8, (-fontSize / 2) - 4, kwWidth + 16, fontSize + 10);
-
-    ctx.fillStyle = "#000000";
     ctx.textBaseline = "middle";
-    ctx.fillText(keyword, -kwWidth / 2, 0);
+
+    if (hlMode === "stabilo") {
+        const hlColor = highlightColors[Math.floor(Math.random() * highlightColors.length)];
+        ctx.fillStyle = hlColor;
+        ctx.fillRect((-kwWidth / 2) - 8, (-fontSize / 2) - 4, kwWidth + 16, fontSize + 10);
+        ctx.fillStyle = "#000000";
+        ctx.fillText(keyword, -kwWidth / 2, 0);
+    } else if (hlMode === "subtle") {
+        ctx.fillStyle = palette.text;
+        ctx.fillText(keyword, -kwWidth / 2, 0);
+        ctx.strokeStyle = palette.type === "darkprint" ? "#ffeb3b" : "#d32f2f";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-kwWidth / 2, (fontSize / 2) + 4);
+        ctx.lineTo(kwWidth / 2, (fontSize / 2) + 4);
+        ctx.stroke();
+    } else {
+        ctx.font = `${fontSize}px ${font}`;
+        ctx.fillStyle = palette.text;
+        ctx.fillText(keyword, -kwWidth / 2, 0);
+    }
 
     ctx.font = `${fontSize}px ${font}`;
     ctx.fillStyle = palette.text;
@@ -199,7 +250,7 @@ function startPreview() {
     const speed = parseInt(document.getElementById('speedSelect').value);
     
     drawDynamicFrame(keyword);
-    statusText.innerText = "▶️ Memutar pratinjau potongan kertas dinamis...";
+    statusText.innerText = "▶️ Memutar pratinjau kecepatan tinggi...";
     
     animationInterval = setInterval(() => {
         drawDynamicFrame(keyword);
@@ -216,7 +267,7 @@ function recordVideo() {
     const keyword = document.getElementById('keywordInput').value.trim() || "Fokus";
     const speed = parseInt(document.getElementById('speedSelect').value);
     
-    statusText.innerText = "🔴 Sedang merekam video selama 5 detik... Mohon tunggu.";
+    statusText.innerText = "🔴 Merekam video 5 detik... Tunggu hingga unduhan otomatis muncul.";
     
     const stream = canvas.captureStream(30);
     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
@@ -233,7 +284,7 @@ function recordVideo() {
         a.href = url;
         a.download = `cutout-${keyword}.webm`;
         a.click();
-        statusText.innerText = "✅ Selesai! Video berhasil diunduh ke perangkat Anda.";
+        statusText.innerText = "✅ Selesai! Video berhasil diunduh.";
     };
 
     mediaRecorder.start();
