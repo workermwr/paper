@@ -3,6 +3,16 @@ const ctx = canvas.getContext('2d');
 const statusText = document.getElementById('statusText');
 let animationInterval;
 
+const noiseCanvas = document.createElement('canvas');
+noiseCanvas.width = 250;
+noiseCanvas.height = 250;
+const noiseCtx = noiseCanvas.getContext('2d');
+for (let i = 0; i < 800; i++) {
+    noiseCtx.fillStyle = Math.random() > 0.5 ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.12)";
+    noiseCtx.fillRect(Math.random() * 250, Math.random() * 250, 2, 2);
+}
+const paperTexturePattern = ctx.createPattern(noiseCanvas, 'repeat');
+
 const textSnippets = [
     { before: "di dalam keheningan malam yang panjang, ia akhirnya menemukan arti dari", after: "yang selama ini dicari di balik tumpukan buku tua di sudut ruangan." },
     { before: "sebab tanpa adanya", after: "yang kuat, segala rencana besar hanyalah barisan kalimat tanpa makna." },
@@ -61,34 +71,27 @@ function drawTornPaper(x, y, w, h, fillStyle, strokeStyle, hasShadow = true) {
     ctx.lineWidth = 2;
     
     if (hasShadow) {
-        ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
-        ctx.shadowBlur = 30;
-        ctx.shadowOffsetX = (Math.random() - 0.5) * 28;
-        ctx.shadowOffsetY = 15;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetX = 6;
+        ctx.shadowOffsetY = 8;
     }
 
     ctx.beginPath();
     ctx.moveTo(x, y);
 
-    const step = Math.floor(Math.random() * 10) + 12;
+    const step = 28;
     for (let curX = x; curX <= x + w; curX += step) {
-        let jitterY = y + (Math.random() - 0.5) * 11;
-        ctx.lineTo(curX, jitterY);
+        ctx.lineTo(curX, y + (Math.random() - 0.5) * 9);
     }
-    
     for (let curY = y; curY <= y + h; curY += step * 2) {
-        let jitterX = (x + w) + (Math.random() - 0.5) * 7;
-        ctx.lineTo(jitterX, curY);
+        ctx.lineTo((x + w) + (Math.random() - 0.5) * 6, curY);
     }
-
     for (let curX = x + w; curX >= x; curX -= step) {
-        let jitterY = (y + h) + (Math.random() - 0.5) * 11;
-        ctx.lineTo(curX, jitterY);
+        ctx.lineTo(curX, (y + h) + (Math.random() - 0.5) * 9);
     }
-
     for (let curY = y + h; curY >= y; curY -= step * 2) {
-        let jitterX = x + (Math.random() - 0.5) * 7;
-        ctx.lineTo(jitterX, curY);
+        ctx.lineTo(x + (Math.random() - 0.5) * 6, curY);
     }
 
     ctx.closePath();
@@ -110,15 +113,14 @@ function drawDynamicFrame(keyword) {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    const bgLayers = Math.floor(Math.random() * 2) + 2;
-    for (let b = 0; b < bgLayers; b++) {
+    for (let b = 0; b < 2; b++) {
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.rotate((Math.random() - 0.5) * 0.55);
         const bgPal = paperPalettes[Math.floor(Math.random() * paperPalettes.length)];
         const offsetX = (Math.random() - 0.5) * 180;
         const offsetY = (Math.random() - 0.5) * 240;
-        drawTornPaper(-320 + offsetX, -430 + offsetY, 640, 860, bgPal.bg, bgPal.border, bgMode !== "greenscreen");
+        drawTornPaper(-320 + offsetX, -430 + offsetY, 640, 860, bgPal.bg, bgPal.border, false);
         ctx.restore();
     }
 
@@ -138,9 +140,9 @@ function drawDynamicFrame(keyword) {
     
     drawTornPaper(-paperW / 2, -paperH / 2, paperW, paperH, palette.bg, palette.border, bgMode !== "greenscreen");
 
-    for (let i = 0; i < 1500; i++) {
-        ctx.fillStyle = Math.random() > 0.5 ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.18)";
-        ctx.fillRect((Math.random() - 0.5) * paperW, (Math.random() - 0.5) * paperH, 2, 2);
+    if (paperTexturePattern) {
+        ctx.fillStyle = paperTexturePattern;
+        ctx.fillRect(-paperW / 2, -paperH / 2, paperW, paperH);
     }
 
     ctx.fillStyle = palette.border;
@@ -184,6 +186,7 @@ function drawDynamicFrame(keyword) {
 
     ctx.font = `bold ${fontSize}px ${font}`;
     const kwWidth = ctx.measureText(keyword).width;
+    const spaceWidth = ctx.measureText(" ").width;
     const lineHeight = fontSize * 1.55;
     const marginX = 45;
 
@@ -216,7 +219,7 @@ function drawDynamicFrame(keyword) {
     let curY = 0;
 
     for (let word of fullAfter) {
-        let wWidth = ctx.measureText(word + " ").width;
+        let wWidth = ctx.measureText(word).width + spaceWidth;
         if (curX + wWidth > paperW / 2 - marginX) {
             curX = -paperW / 2 + marginX;
             curY += lineHeight;
@@ -231,13 +234,13 @@ function drawDynamicFrame(keyword) {
 
     for (let i = fullBefore.length - 1; i >= 0; i--) {
         let word = fullBefore[i];
-        let wWidth = ctx.measureText(word + " ").width;
+        let wWidth = ctx.measureText(word).width + spaceWidth;
         if (curX - wWidth < -paperW / 2 + marginX) {
             curX = paperW / 2 - marginX;
             curY -= lineHeight;
         }
         if (curY < (-paperH / 2) + 45) break;
-        ctx.fillText(word, curX - wWidth + ctx.measureText(" ").width, curY);
+        ctx.fillText(word, curX - wWidth + spaceWidth, curY);
         curX -= wWidth;
     }
 
@@ -250,7 +253,7 @@ function startPreview() {
     const speed = parseInt(document.getElementById('speedSelect').value);
     
     drawDynamicFrame(keyword);
-    statusText.innerText = "▶️ Memutar pratinjau kecepatan tinggi...";
+    statusText.innerText = "▶️ Memutar pratinjau kecepatan tinggi (Anti-Lag)...";
     
     animationInterval = setInterval(() => {
         drawDynamicFrame(keyword);
