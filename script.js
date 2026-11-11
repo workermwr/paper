@@ -64,138 +64,95 @@ const paperPalettes = [
 
 const highlightColors = ["#ffeb3b", "#00e5ff", "#aeea00", "#ff6e40", "#ea80fc", "#ffd54f"];
 
-function drawTornPaper(x, y, w, h, fillStyle, strokeStyle, hasShadow = true) {
-    ctx.save();
-    ctx.fillStyle = fillStyle;
-    ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = 2;
-    
-    if (hasShadow) {
-        ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
-        ctx.shadowBlur = 14;
-        ctx.shadowOffsetX = 6;
-        ctx.shadowOffsetY = 8;
+function generateDenseText(count) {
+    let result = [];
+    for (let i = 0; i < count; i++) {
+        let p = fillerParagraphs[Math.floor(Math.random() * fillerParagraphs.length)];
+        result.push(p);
     }
-
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-
-    const step = 28;
-    for (let curX = x; curX <= x + w; curX += step) {
-        ctx.lineTo(curX, y + (Math.random() - 0.5) * 9);
-    }
-    for (let curY = y; curY <= y + h; curY += step * 2) {
-        ctx.lineTo((x + w) + (Math.random() - 0.5) * 6, curY);
-    }
-    for (let curX = x + w; curX >= x; curX -= step) {
-        ctx.lineTo(curX, (y + h) + (Math.random() - 0.5) * 9);
-    }
-    for (let curY = y + h; curY >= y; curY -= step * 2) {
-        ctx.lineTo(x + (Math.random() - 0.5) * 6, curY);
-    }
-
-    ctx.closePath();
-    ctx.fill();
-    
-    ctx.shadowColor = "transparent";
-    ctx.stroke();
-    ctx.restore();
+    return result.join(" ");
 }
 function drawDynamicFrame(keyword) {
     const bgMode = document.getElementById('bgModeSelect').value;
     const hlMode = document.getElementById('highlightModeSelect').value;
 
-    if (bgMode === "greenscreen") {
-        ctx.fillStyle = "#00b140";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    } else {
-        ctx.fillStyle = "#100f0e";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    for (let b = 0; b < 2; b++) {
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate((Math.random() - 0.5) * 0.55);
-        const bgPal = paperPalettes[Math.floor(Math.random() * paperPalettes.length)];
-        const offsetX = (Math.random() - 0.5) * 180;
-        const offsetY = (Math.random() - 0.5) * 240;
-        drawTornPaper(-320 + offsetX, -430 + offsetY, 640, 860, bgPal.bg, bgPal.border, false);
-        ctx.restore();
-    }
-
     const palette = paperPalettes[Math.floor(Math.random() * paperPalettes.length)];
     const font = fonts[Math.floor(Math.random() * fonts.length)];
-    const fontSize = Math.floor(Math.random() * 18) + 32;
-    const angle = (Math.random() - 0.5) * 0.18;
-    const jitterX = (Math.random() - 0.5) * 32;
-    const jitterY = (Math.random() - 0.5) * 32;
+    const fontSize = Math.floor(Math.random() * 14) + 32;
+    const angle = (Math.random() - 0.5) * 0.22;
+    const jitterX = (Math.random() - 0.5) * 28;
+    const jitterY = (Math.random() - 0.5) * 28;
+
+    ctx.fillStyle = bgMode === "greenscreen" ? "#00b140" : palette.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
     ctx.translate((canvas.width / 2) + jitterX, (canvas.height / 2) + jitterY);
     ctx.rotate(angle);
 
-    const paperW = Math.floor(Math.random() * 160) + 540;
-    const paperH = Math.floor(Math.random() * 400) + 380;
-    
-    drawTornPaper(-paperW / 2, -paperH / 2, paperW, paperH, palette.bg, palette.border, bgMode !== "greenscreen");
+    const pageW = Math.floor(Math.random() * 250) + 950;
+    const pageH = Math.floor(Math.random() * 300) + 1550;
 
-    if (paperTexturePattern) {
-        ctx.fillStyle = paperTexturePattern;
-        ctx.fillRect(-paperW / 2, -paperH / 2, paperW, paperH);
+    if (bgMode !== "greenscreen") {
+        ctx.fillStyle = palette.bg;
+        ctx.fillRect(-pageW / 2, -pageH / 2, pageW, pageH);
+
+        if (paperTexturePattern) {
+            ctx.fillStyle = paperTexturePattern;
+            ctx.fillRect(-pageW / 2, -pageH / 2, pageW, pageH);
+        }
+    } else {
+        const cropW = Math.floor(Math.random() * 120) + 640;
+        const cropH = Math.floor(Math.random() * 250) + 1150;
+        ctx.fillStyle = palette.bg;
+        ctx.fillRect(-cropW / 2, -cropH / 2, cropW, cropH);
+        if (paperTexturePattern) {
+            ctx.fillStyle = paperTexturePattern;
+            ctx.fillRect(-cropW / 2, -cropH / 2, cropW, cropH);
+        }
+        ctx.beginPath();
+        ctx.rect(-cropW / 2, -cropH / 2, cropW, cropH);
+        ctx.clip();
     }
 
-    ctx.fillStyle = palette.border;
     ctx.strokeStyle = palette.border;
     ctx.lineWidth = 2;
 
-    if (palette.type === "newspaper") {
-        ctx.beginPath();
-        ctx.moveTo(-paperW/2 + 30, -paperH/2 + 38);
-        ctx.lineTo(paperW/2 - 30, -paperH/2 + 38);
-        ctx.stroke();
-        ctx.font = "bold 14px Courier New";
-        ctx.fillText("ARCHIVES • VOL " + Math.floor(Math.random() * 90 + 10), -paperW/2 + 30, -paperH/2 + 26);
-    } else if (palette.type === "book" || palette.type === "novel") {
-        ctx.font = "italic 16px Georgia";
-        ctx.fillText("Hal. " + Math.floor(Math.random() * 450 + 15), paperW/2 - 95, -paperH/2 + 32);
-    } else if (palette.type === "lined") {
-        ctx.strokeStyle = "rgba(100, 149, 237, 0.25)";
+    if (palette.type === "lined") {
+        ctx.strokeStyle = "rgba(100, 149, 237, 0.22)";
         ctx.lineWidth = 1;
-        for (let ly = -paperH/2 + 40; ly < paperH/2 - 30; ly += 36) {
+        for (let ly = -pageH / 2; ly < pageH / 2; ly += 38) {
             ctx.beginPath();
-            ctx.moveTo(-paperW/2 + 25, ly);
-            ctx.lineTo(paperW/2 - 25, ly);
+            ctx.moveTo(-pageW / 2, ly);
+            ctx.lineTo(pageW / 2, ly);
             ctx.stroke();
         }
     } else if (palette.type === "columns") {
         ctx.beginPath();
-        ctx.moveTo(0, -paperH/2 + 25);
-        ctx.lineTo(0, paperH/2 - 25);
+        ctx.moveTo(0, -pageH / 2);
+        ctx.lineTo(0, pageH / 2);
         ctx.stroke();
-    } else if (palette.type === "journal") {
-        ctx.strokeRect(-paperW/2 + 20, -paperH/2 + 20, paperW - 40, paperH - 40);
     }
 
     const snippet = textSnippets[Math.floor(Math.random() * textSnippets.length)];
-    const extraBefore = fillerParagraphs[Math.floor(Math.random() * fillerParagraphs.length)];
-    const extraAfter = fillerParagraphs[Math.floor(Math.random() * fillerParagraphs.length)];
+    const denseBefore = generateDenseText(7);
+    const denseAfter = generateDenseText(7);
 
-    const fullBefore = (extraBefore + " " + snippet.before).split(" ");
-    const fullAfter = (snippet.after + " " + extraAfter).split(" ");
+    const fullBefore = (denseBefore + " " + snippet.before).split(" ");
+    const fullAfter = (snippet.after + " " + denseAfter).split(" ");
 
     ctx.font = `bold ${fontSize}px ${font}`;
     const kwWidth = ctx.measureText(keyword).width;
     const spaceWidth = ctx.measureText(" ").width;
-    const lineHeight = fontSize * 1.55;
-    const marginX = 45;
+    const lineHeight = fontSize * 1.48;
+    const limitX = (pageW / 2) - 20;
 
     ctx.textBaseline = "middle";
 
     if (hlMode === "stabilo") {
         const hlColor = highlightColors[Math.floor(Math.random() * highlightColors.length)];
         ctx.fillStyle = hlColor;
-        ctx.fillRect((-kwWidth / 2) - 8, (-fontSize / 2) - 4, kwWidth + 16, fontSize + 10);
+        ctx.fillRect((-kwWidth / 2) - 6, (-fontSize / 2) - 4, kwWidth + 12, fontSize + 8);
         ctx.fillStyle = "#000000";
         ctx.fillText(keyword, -kwWidth / 2, 0);
     } else if (hlMode === "subtle") {
@@ -215,31 +172,31 @@ function drawDynamicFrame(keyword) {
 
     ctx.font = `${fontSize}px ${font}`;
     ctx.fillStyle = palette.text;
-    let curX = (kwWidth / 2) + 12;
+    let curX = (kwWidth / 2) + spaceWidth;
     let curY = 0;
 
     for (let word of fullAfter) {
         let wWidth = ctx.measureText(word).width + spaceWidth;
-        if (curX + wWidth > paperW / 2 - marginX) {
-            curX = -paperW / 2 + marginX;
+        if (curX + wWidth > limitX) {
+            curX = -limitX + (Math.random() * 15);
             curY += lineHeight;
         }
-        if (curY > (paperH / 2) - 45) break;
+        if (curY > (pageH / 2) - 20) break;
         ctx.fillText(word, curX, curY);
         curX += wWidth;
     }
 
-    curX = (-kwWidth / 2) - 12;
+    curX = (-kwWidth / 2) - spaceWidth;
     curY = 0;
 
     for (let i = fullBefore.length - 1; i >= 0; i--) {
         let word = fullBefore[i];
         let wWidth = ctx.measureText(word).width + spaceWidth;
-        if (curX - wWidth < -paperW / 2 + marginX) {
-            curX = paperW / 2 - marginX;
+        if (curX - wWidth < -limitX) {
+            curX = limitX - (Math.random() * 15);
             curY -= lineHeight;
         }
-        if (curY < (-paperH / 2) + 45) break;
+        if (curY < (-pageH / 2) + 20) break;
         ctx.fillText(word, curX - wWidth + spaceWidth, curY);
         curX -= wWidth;
     }
@@ -253,7 +210,7 @@ function startPreview() {
     const speed = parseInt(document.getElementById('speedSelect').value);
     
     drawDynamicFrame(keyword);
-    statusText.innerText = "▶️ Memutar pratinjau kecepatan tinggi (Anti-Lag)...";
+    statusText.innerText = "▶️ Memutar pratinjau halaman penuh terpotong...";
     
     animationInterval = setInterval(() => {
         drawDynamicFrame(keyword);
